@@ -1,0 +1,20 @@
+box: wercker/golang
+build:
+    steps:
+    - script:
+        name: echo golang information
+        code: |
+            echo "Version information: $(go version)"
+    - script:
+        name: installation
+        code: |
+            export PROJPATH=$GOPATH/src/github.com/odeke-em
+            mkdir -p $PROJPATH
+            START_DIR=$(pwd)
+            cd $PROJPATH
+            git clone https://github.com/odeke-em/gonotif.git
+
+            cd gonotif # Main project dir
+            for i in $(find . -maxdepth 1 -type d -regex "./[^.]*");do  echo -e "Going into \033[42m$i\033[00m";cd $i;go install;go test;cd ../;done
+
+            cd $START_DIR
