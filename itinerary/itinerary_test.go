@@ -1,7 +1,10 @@
 // Author: Emmanuel Odeke <odeke@ualberta.ca>
 
 package itinerary
-import "testing"
+import (
+    "fmt"
+    "testing"
+)
 
 func TestInit(t *testing.T) {
     dst := "Cavendish"
@@ -75,4 +78,58 @@ func TestComparisons(t *testing.T) {
     } else if it1.LessByExpiry(it1) != false {
         t.Errorf("Comparing self should return false")
     }
+}
+
+func TestClusteringByOrigin(t *testing.T) {
+    destClustering := ClusterByOrigin(
+        New(800, "Edmonton", "Atlanta", "YEG-ATL"),
+        New(6880,  "Oslo", "Sacramento", "TRF-SCN"),
+        New(6880,  "Edmonton", "Calgary", "YEG-YYZ"),
+        New(4590,  "Edmonton", "AbuDhabi", "YYZ-AUH"),
+        New(8790,  "Kilimanjaro", "Amsterdam", "JRO-AMS"),
+        New(9990,  "Kilimanjaro", "Amsterdam", "JRO-AMS"),
+        New(590,  "Kilimanjaro", "Jomo-Kenyatta", "JRO-NBO"),
+        New(190,  "Anchorage", "Los Angeles", "ANC-LAX"),
+        New(990,  "Luxemborg", "Los Angeles", "LUX-LAX"),
+        New(6890,  "Amsterdam", "Ontario", "AMS-ONT"),
+        New(7890,  "Amsterdam", "Los Angeles", "AMS-LAX"),
+    )
+
+    fromKilimanjaro, ok := destClustering["Kilimanjaro"]
+    if ok != true {
+        t.Errorf("Kilimanjaro origins are expected")
+    } else if len(fromKilimanjaro) < 2 {
+        t.Errorf("Kilimanjaro had more than one origin")
+    }
+
+    _, illOK := destClustering["illuminati"]
+    if illOK != false {
+        t.Errorf("No such key was entered previously")
+    }
+
+    fmt.Printf("fromKilimanjaro: %v\n", fromKilimanjaro)
+}
+
+
+func TestClusteringByDestination(t *testing.T) {
+    destClustering := ClusterByDestination(
+        New(80, "Greenland", "Uganda", nil),
+        New(10,  "Alaska", "Russia", "AlaRus"),
+        New(4,  "Boston", "Seattle", "BosSea"),
+        New(1,  "Vancouver", "Seattle", "VanSea"),
+    )
+
+    toSeattle, ok := destClustering["Seattle"]
+    if ok != true {
+        t.Errorf("Seattle final destinations are expected")
+    } else if len(toSeattle) < 2 {
+        t.Errorf("Seattle as a final destination was present more than once")
+    }
+
+    _, illOK := destClustering["NewOrleans"]
+    if illOK != false {
+        t.Errorf("No such key was entered previously")
+    }
+
+    fmt.Printf("toSeattle: %v\n", toSeattle)
 }

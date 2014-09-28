@@ -3,6 +3,7 @@
 package itinerary
 
 import (
+    "fmt"
     "time"
 )
 
@@ -14,6 +15,19 @@ type Itinerary struct {
     destination interface{}
 }
 
+type Attribute int
+
+const (
+    Meta Attribute = 1
+    Origin Attribute = 2
+    Destination Attribute = 3
+)
+
+
+func (self Itinerary) String() string {
+    return fmt.Sprintf("<%s:%s>::%d",
+                        self.origin, self.destination, self.expiryNanos)
+}
 
 func (self *Itinerary) Init(ttl uint64, origin, dst, meta interface{}) *Itinerary {
     self.meta = meta
@@ -87,4 +101,43 @@ func (self *Itinerary) LessByExpiry(other *Itinerary) bool {
 
 func (self *Itinerary) LessByArrival(other *Itinerary) bool {
     return self.GetArrival() < other.GetArrival()
+}
+
+
+func groupBy(attr Attribute, itins []*Itinerary) map[interface{}][]*Itinerary {
+    bucketMap := make(map[interface{}][]*Itinerary)
+    var retrAttr interface{}
+    for _, it := range itins {
+        switch attr {
+        case Meta:
+            retrAttr = it.meta
+        case Origin:
+            retrAttr = it.origin
+        case Destination:
+            retrAttr = it.destination
+        default:
+            retrAttr = nil
+        }
+
+        bucket, ok := bucketMap[retrAttr]
+        if ok == false { // First time being entered
+            bucket = []*Itinerary{it}
+        } else {
+            bucket = append(bucket, it)
+        }
+
+        bucketMap[retrAttr] = bucket
+    }
+
+    return bucketMap
+}
+
+
+func ClusterByDestination(itins ...*Itinerary) map[interface{}][]*Itinerary {
+    return groupBy(Destination, itins)
+}
+
+
+func ClusterByOrigin(itins ...*Itinerary) map[interface{}][]*Itinerary {
+    return groupBy(Origin, itins)
 }
