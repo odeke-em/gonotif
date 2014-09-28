@@ -8,17 +8,17 @@ import (
 
 type Itinerary struct {
     meta interface{}
-    expiryNanos int64
-    arrivalNanos int64
+    expiryNanos uint64
+    arrivalNanos uint64
     origin interface{}
     destination interface{}
 }
 
 
-func (self *Itinerary) Init(ttl int64, origin, dst, meta interface{}) *Itinerary {
+func (self *Itinerary) Init(ttl uint64, origin, dst, meta interface{}) *Itinerary {
     self.meta = meta
     self.origin = origin
-    self.arrivalNanos = time.Now().UnixNano()
+    self.arrivalNanos = uint64(time.Now().UnixNano())
     self.SetTTLNano(ttl)
     self.destination = dst
 
@@ -26,18 +26,18 @@ func (self *Itinerary) Init(ttl int64, origin, dst, meta interface{}) *Itinerary
 }
 
 
-func (self *Itinerary) SetTTLNano(ttl int64) {
+func (self *Itinerary) SetTTLNano(ttl uint64) {
     self.expiryNanos = self.arrivalNanos + ttl
 }
 
 
-func New(ttl int64, origin, dst, meta interface{}) *Itinerary {
+func New(ttl uint64, origin, dst, meta interface{}) *Itinerary {
     return new(Itinerary).Init(ttl, origin, dst, meta)
 }
 
 
 func (self *Itinerary) IsExpired() bool {
-    return self.expiryNanos < int64(time.Now().UnixNano())
+    return self.expiryNanos < uint64(time.Now().UnixNano())
 }
 
 
@@ -65,12 +65,12 @@ func (self *Itinerary) GetMeta() interface{} {
     return self.meta
 }
 
-func (self *Itinerary) GetExpiry() int64 {
+func (self *Itinerary) GetExpiry() uint64 {
     return self.expiryNanos
 }
 
 
-func (self *Itinerary) GetArrival() int64 {
+func (self *Itinerary) GetArrival() uint64 {
     return self.arrivalNanos
 }
 
