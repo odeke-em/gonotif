@@ -104,20 +104,49 @@ func (self *Itinerary) LessByArrival(other *Itinerary) bool {
 }
 
 
+func metaGetter(it *Itinerary) interface{} {
+    return it.GetMeta()
+}
+
+
+func originGetter(it *Itinerary) interface{} {
+    return it.GetOrigin()
+}
+
+func destinationGetter(it *Itinerary) interface{} {
+    return it.GetDestination()
+}
+
+
+func nullReturn(it *Itinerary) interface{} {
+    return nil
+}
+
+
+func attrGetter(attr Attribute) func(*Itinerary) interface{} {
+    getter := metaGetter
+    switch attr {
+    case Meta:
+        getter = metaGetter
+    case Origin:
+        getter = originGetter
+    case Destination:
+        getter = destinationGetter
+    default:
+        getter = nullReturn
+    }
+
+    return getter
+}
+
+
 func groupBy(attr Attribute, itins []*Itinerary) map[interface{}][]*Itinerary {
     bucketMap := make(map[interface{}][]*Itinerary)
+    getter := attrGetter(attr)
+
     var retrAttr interface{}
     for _, it := range itins {
-        switch attr {
-        case Meta:
-            retrAttr = it.meta
-        case Origin:
-            retrAttr = it.origin
-        case Destination:
-            retrAttr = it.destination
-        default:
-            retrAttr = nil
-        }
+        retrAttr = getter(it);
 
         bucket, ok := bucketMap[retrAttr]
         if ok == false { // First time being entered
